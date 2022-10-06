@@ -1,0 +1,81 @@
+type Todo @model @auth(rules: [{allow: owner}]) {
+  id: ID!
+  name: String!
+  description: String
+}
+
+type User @model @auth(rules: [{allow: owner}, {allow: groups, groups: ["Admin"]}]) {
+  id: ID! @primaryKey
+  name: String!
+  pw: String!
+  sex: String
+  birth: AWSDate
+  dogs: [Dog] @hasMany(indexName: "byUser", fields: ["id"])
+  reviews: [Review] @hasMany(indexName: "byUser", fields: ["id"])
+}
+
+type Dog @model @auth(rules: [{allow: owner}, {allow: groups, groups: ["Admin"]}]) {
+  userID: ID! @index(name: "byUser", sortKeyFields: ["name"], queryField: "dogByUser")
+  id: ID! @primaryKey
+  name: String
+  cosmetics: [Cosmetic] @manyToMany(relationName: "dogCosmetic")
+}
+
+type Cosmetic @model @searchable @auth(rules: [{allow: owner}, {allow: groups, groups: ["Admin"]}]) {
+  id: ID! @primaryKey
+  title: String
+  reviews: [Review] @hasMany(indexName: "byCosmetic", fields: ["id"])
+  dogs: [Dog] @manyToMany(relationName: "dogCosmetic")
+  ingredients: [Ingredient] @manyToMany(relationName: "IngredientCosmetic")
+}
+
+type Review @model @auth(rules: [{allow: owner}, {allow: groups, groups: ["Admin"]}]) {
+  id: ID! @primaryKey
+  title: String
+  content: String
+  userID: ID! @index(name: "byUser", sortKeyFields: ["id"], queryField: "reviewByUser")
+  cosmeticID: ID! @index(name: "byCosmetic", sortKeyFields: ["id"], queryField: "reviewByCosmetic")
+}
+
+type Ingredient @model @auth(rules: [{allow: owner}, {allow: groups, groups: ["Admin"]}]) {
+  id: ID! @primaryKey
+  name: String!
+  cosmetics: [Cosmetic] @manyToMany(relationName: "IngredientCosmetic")
+}
+
+type CosmeticIngredientCount @model @auth(rules: [{allow: owner}, {allow: groups, groups: ["Admin"]}]) {
+  id: ID!
+  cosmeticID: ID
+  IngredientID: ID
+  count_info: AWSJSON
+}
+
+type DCT @model @auth(rules: [{allow: owner}, {allow: groups, groups: ["Admin"]}]) {
+  id: ID!
+  title: String
+  contnet: String
+  good_id: [ID]
+}
+
+type DCTGood @model @auth(rules: [{allow: owner}, {allow: groups, groups: ["Admin"]}]) {
+  id: ID!
+  content_id: String
+  like: Boolean
+  trial: Boolean
+  user_name: String
+  user_id: String
+}
+
+type Enroll @model @auth(rules: [{allow: owner}, {allow: groups, groups: ["Admin"]}]) {
+  id: ID!
+  title: String
+  user_id: String
+  liek: String
+}
+
+type Banner @model @auth(rules: [{allow: owner}, {allow: groups, groups: ["Admin"]}]) {
+  id: ID!
+  title: String
+  img: AWSURL
+  link: AWSURL
+} 
